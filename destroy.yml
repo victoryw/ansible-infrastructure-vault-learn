@@ -4,6 +4,8 @@
   hosts: all
   vars:
    dbname: "data-db"
+   dbPort: "5436"
+   superUserPassword: "r0ys1ngh4m"
    vaultname: "vault-dev"
    vaultVolume: ./vault-volume
   tasks:

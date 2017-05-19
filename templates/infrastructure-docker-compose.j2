@@ -4,9 +4,9 @@ services:
     image: postgres:9.6
     container_name: {{ dbname }}
     ports:
-      - 5436:5432
+      - {{dbPort}}:5432
     environment:
-      - POSTGRES_PASSWORD=r0ys1ngh4m
+      - POSTGRES_PASSWORD={{superUserPassword}}
     healthcheck:
       test: ["CMD-SHELL", "psql -h 'localhost' -U 'postgres' -c '\\l'"]
       interval: 10s

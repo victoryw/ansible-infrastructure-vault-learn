@@ -4,11 +4,19 @@
   hosts: all
   vars:
     dbname: "data-db"
+    dbPort: "5436"
+    superUserPassword: "r0ys1ngh4m"
+    
+    dbInstanceOwner: "vaultuser"
+    dbInstanceName: "vaultdb"
+    vaultUserPassword: "r0ys1ngh4m"
+
     vaultname: "vault-dev"
     vaultServer: "http://127.0.0.1:8200"
     vaultPort: 0.0.0.0:1234
     vaultVolume: ./vault-volume
     vaultConfigVolume: "{{vaultVolume}}/config"
+
 
   tasks:
     - name: Ensure docker-compose directory exists
@@ -44,19 +52,51 @@
       retries: 5
       delay: 10
 
+    - name: pip install psycopg2
+      pip:
+        name: psycopg2
+        state: present
+      become: True
 
-    - name: Create user
-      action: command docker exec  {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "CREATE USER vaultuser WITH PASSWORD 'r0ys1ngh4m';"
+    - name: crate vault user
+      postgresql_user:
+        name: "{{dbInstanceOwner}}"
+        password: "{{vaultUserPassword}}"
+        port: "{{dbPort}}"
+        login_host: "{{ansible_default_ipv4.address}}"
+        login_password: "{{superUserPassword}}"
 
-    - name: Create vaultdb db
-      action: command docker exec  {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "CREATE DATABASE vaultdb OWNER vaultuser;"
+    - name: create vaultdb
+      postgresql_db:
+        name: "{{dbInstanceName}}"
+        owner: "{{dbInstanceOwner}}"
+        port: "{{dbPort}}"
+        login_host: "{{ansible_default_ipv4.address}}"
+        login_password: "{{superUserPassword}}"
 
+    - name: GRANT ALL PRIVILEGES
+      postgresql_privs:
+        db: "{{dbInstanceName}}"
+        privs: ALL
+        type: database
+        role: "{{dbInstanceOwner}}"
+        port: "{{dbPort}}"
+        login_host: "{{ansible_default_ipv4.address}}"
+        login_password: "{{superUserPassword}}"
 
-    - name: Grant privileges
-      action: command docker exec {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "GRANT ALL PRIVILEGES ON DATABASE vaultdb to vaultuser;"
-
+    # - name: Create user
+    #   action: command docker exec  {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "CREATE USER vaultuser WITH PASSWORD 'r0ys1ngh4m';"
+    #
+    # - name: Create vaultdb db
+    #   action: command docker exec  {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "CREATE DATABASE vaultdb OWNER vaultuser;"
+    #
+    #
+    # - name: Grant privileges
+    #   action: command docker exec {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "GRANT ALL PRIVILEGES ON DATABASE vaultdb to vaultuser;"
+    #
     - name: Vault init
       script: vault-init.sh {{vaultname}} {{vaultServer}}
+      run_once: true
 
     # - name: Ensure db migrate directory exists
     #   file:
