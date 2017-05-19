@@ -2,7 +2,7 @@ version: '2.1'
 services:
   data-db:
     image: postgres:9.6
-    container_name: data-db
+    container_name: {{ dbname }}
     ports:
       - 5436:5432
     environment:

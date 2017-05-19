@@ -2,6 +2,8 @@
 # master playbook
 - name: Deploy infrastructure
   hosts: all
+  vars:
+   dbname: "data-db"
   tasks:
     - name: Ensure docker-compose directory exists
       file:
@@ -17,3 +19,5 @@
       docker_service:
         project_name: infrastructure
         project_src: ./infrastructure
+        state: present
+        remove_volumes: yes
