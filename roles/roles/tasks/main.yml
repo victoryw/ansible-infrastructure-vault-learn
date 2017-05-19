@@ -1,0 +1,9 @@
+---
+# Tasks for roles
+
+#- name: example
+#  action: example
+#  notify:
+#    - restart service
+#  tags:
+#    - example

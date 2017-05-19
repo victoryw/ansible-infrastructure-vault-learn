@@ -1,0 +1,19 @@
+---
+# master playbook
+- name: Deploy infrastructure
+  hosts: all
+  tasks:
+    - name: Ensure docker-compose directory exists
+      file:
+        path: ./infrastructure
+        state: directory
+
+    - name: Ensure docker-compose file is up to date
+      template:
+        src: docker-compose.j2
+        dest: "./infrastructure/docker-compose.yml"
+
+    - name: docker-compose up to build infrastructure
+      docker_service:
+        project_name: infrastructure
+        project_src: ./infrastructure
