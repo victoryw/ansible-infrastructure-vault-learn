@@ -15,11 +15,10 @@ services:
 
   vault-dev:
     image: vault
-    container_name: vault-dev
+    container_name: {{ vaultname }}
     ports:
       - "8201:1234"
     volumes:
-      - ../vault-volume/file:/vault/file:rw
       - ../vault-volume/config:/vault/config:rw
     cap_add:
       - IPC_LOCK

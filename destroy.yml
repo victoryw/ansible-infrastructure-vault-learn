@@ -4,6 +4,8 @@
   hosts: all
   vars:
    dbname: "data-db"
+   vaultname: "vault-dev"
+   vaultVolume: ./vault-volume
   tasks:
     - name: Ensure docker-compose directory exists
       file:
@@ -12,12 +14,17 @@
 
     - name: Ensure docker-compose file is up to date
       template:
-        src: docker-compose.j2
+        src: infrastructure-docker-compose.j2
         dest: "./infrastructure/docker-compose.yml"
 
     - name: docker-compose up to build infrastructure
       docker_service:
         project_name: infrastructure
         project_src: ./infrastructure
-        state: present
         remove_volumes: yes
+        state: absent
+
+    - name: Ensure vault volumes exists
+      file:
+        path: "{{vaultVolume}}"
+        state: absent

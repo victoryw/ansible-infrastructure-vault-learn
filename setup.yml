@@ -3,7 +3,13 @@
 - name: Deploy infrastructure
   hosts: all
   vars:
-   dbname: "data-db"
+    dbname: "data-db"
+    vaultname: "vault-dev"
+    vaultServer: "http://127.0.0.1:8200"
+    vaultPort: 0.0.0.0:1234
+    vaultVolume: ./vault-volume
+    vaultConfigVolume: "{{vaultVolume}}/config"
+
   tasks:
     - name: Ensure docker-compose directory exists
       file:
@@ -12,19 +18,60 @@
 
     - name: Ensure docker-compose file is up to date
       template:
-        src: docker-compose.j2
+        src: infrastructure-docker-compose.j2
         dest: "./infrastructure/docker-compose.yml"
 
-    - name: docker-compose up to build infrastructure
+    - name: Ensure vault volumes exists
+      file:
+        path: "{{vaultConfigVolume}}"
+        state: directory
+        recurse: yes
+
+    - name: Ensure vault.json file is up to date
+      template:
+        src: vault.json.j2
+        dest: "{{vaultConfigVolume}}/vault.json"
+
+    - name: Docker-compose up to build infrastructure
       docker_service:
         project_name: infrastructure
         project_src: ./infrastructure
-        # state: present
-        # remove_volumes: yes
 
-    - name: wait-for-db-restart
+    - name: Wait for db restart
       action: command docker exec {{dbname}} pg_isready
       register: db_logs
       until: db_logs.stdout.find("/var/run/postgresql:5432 - accepting connections") != -1
       retries: 5
       delay: 10
+
+
+    - name: Create user
+      action: command docker exec  {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "CREATE USER vaultuser WITH PASSWORD 'r0ys1ngh4m';"
+
+    - name: Create vaultdb db
+      action: command docker exec  {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "CREATE DATABASE vaultdb OWNER vaultuser;"
+
+
+    - name: Grant privileges
+      action: command docker exec {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "GRANT ALL PRIVILEGES ON DATABASE vaultdb to vaultuser;"
+
+    - name: Vault init
+      script: vault-init.sh {{vaultname}} {{vaultServer}}
+
+    # - name: Ensure db migrate directory exists
+    #   file:
+    #     path: ./db-migration
+    #     state: directory
+    #
+    # - name: Update db migrate file to latest
+    #   copy:
+    #     src: db-migration-docker-compose.yml
+    #     dest: ./db-migration/docker-compose.yml
+    #     directory_mode: directories
+    #
+    # - name: migrate db
+    #   docker_service:
+    #     project_name: migrate-db
+    #     project_src: ./db-migration
+    #   environment:
+    #     DBIP: "{{ansible_default_ipv4.address}}"

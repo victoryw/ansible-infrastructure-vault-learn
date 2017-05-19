@@ -1,0 +1,14 @@
+version: '2.1'
+services:
+  migration:
+    image: tianyawy/flyway-vault:1.0
+    container_name: migrtor-db
+    command: migrate
+    environment:
+      - VAULT_TOKEN=${VAULT_TOKEN}
+      - VAULT_CONNECT=${DBIP}:8201
+      - VAULT_DB_PATH=secret
+      - VAULT_DB_ROLE=migrator
+      - DB_URL=jdbc:postgresql://${DBIP}:5436/vaultdb
+    volumes:
+      - ./test/migrate:/flyway/sql
