@@ -1,0 +1,16 @@
+---
+dbname: "data-db"
+dbPort: "5436"
+superUserPassword: "r0ys1ngh4m"
+
+dbInstanceOwner: "vaultuser"
+dbInstanceName: "vaultdb"
+vaultUserPassword: "r0ys1ngh4m"
+
+vaultname: "vault-dev"
+vaultServer: "http://127.0.0.1:8200"
+vaultPort: 0.0.0.0:1234
+vaultVolume: ./vault-volume
+vaultConfigVolume: "{{vaultVolume}}/config"
+
+infrastructureDockerComposeFolder: ./.infrastructure

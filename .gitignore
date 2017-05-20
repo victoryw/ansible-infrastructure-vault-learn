@@ -29,6 +29,6 @@ Temporary Items
 .apdisk
 
 
-infrastructure/**
+.infrastructure/**
 vault-volume/
 db-migration/

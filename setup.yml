@@ -2,32 +2,16 @@
 # master playbook
 - name: Deploy infrastructure
   hosts: all
-  vars:
-    dbname: "data-db"
-    dbPort: "5436"
-    superUserPassword: "r0ys1ngh4m"
-    
-    dbInstanceOwner: "vaultuser"
-    dbInstanceName: "vaultdb"
-    vaultUserPassword: "r0ys1ngh4m"
-
-    vaultname: "vault-dev"
-    vaultServer: "http://127.0.0.1:8200"
-    vaultPort: 0.0.0.0:1234
-    vaultVolume: ./vault-volume
-    vaultConfigVolume: "{{vaultVolume}}/config"
-
-
   tasks:
     - name: Ensure docker-compose directory exists
       file:
-        path: ./infrastructure
+        path: "{{infrastructureDockerComposeFolder}}"
         state: directory
 
     - name: Ensure docker-compose file is up to date
       template:
         src: infrastructure-docker-compose.j2
-        dest: "./infrastructure/docker-compose.yml"
+        dest: "{{infrastructureDockerComposeFolder}}/docker-compose.yml"
 
     - name: Ensure vault volumes exists
       file:
@@ -43,7 +27,7 @@
     - name: Docker-compose up to build infrastructure
       docker_service:
         project_name: infrastructure
-        project_src: ./infrastructure
+        project_src: "{{infrastructureDockerComposeFolder}}"
 
     - name: Wait for db restart
       action: command docker exec {{dbname}} pg_isready
@@ -84,34 +68,7 @@
         login_host: "{{ansible_default_ipv4.address}}"
         login_password: "{{superUserPassword}}"
 
-    # - name: Create user
-    #   action: command docker exec  {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "CREATE USER vaultuser WITH PASSWORD 'r0ys1ngh4m';"
-    #
-    # - name: Create vaultdb db
-    #   action: command docker exec  {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "CREATE DATABASE vaultdb OWNER vaultuser;"
-    #
-    #
-    # - name: Grant privileges
-    #   action: command docker exec {{dbname}} psql -v ON_ERROR_STOP=1 --username 'postgres' -c "GRANT ALL PRIVILEGES ON DATABASE vaultdb to vaultuser;"
-    #
+
     - name: Vault init
       script: vault-init.sh {{vaultname}} {{vaultServer}}
       run_once: true
-
-    # - name: Ensure db migrate directory exists
-    #   file:
-    #     path: ./db-migration
-    #     state: directory
-    #
-    # - name: Update db migrate file to latest
-    #   copy:
-    #     src: db-migration-docker-compose.yml
-    #     dest: ./db-migration/docker-compose.yml
-    #     directory_mode: directories
-    #
-    # - name: migrate db
-    #   docker_service:
-    #     project_name: migrate-db
-    #     project_src: ./db-migration
-    #   environment:
-    #     DBIP: "{{ansible_default_ipv4.address}}"
