@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-echo $1
 docker exec  $1 vault write -address=$2 secret/my-application password=H@rdT0Gu3ss 1>/dev/null || exit 125
-docker exec  $1 vault mount -address=$2 postgresql 1>/dev/null || exit 125
+
+postgresqlExist=$(docker exec $1 vault mounts -address=$2 | grep postgresql  2>/dev/null)
+if [ -z "$postgresqlExist" ]; then
+  docker exec  $1 vault mount -address=$2 postgresql 1>/dev/null || exit 125
+fi
 docker exec  $1 vault write -address=$2 postgresql/config/connection \
     connection_url="postgres://postgres:r0ys1ngh4m@db:5432/vaultdb?sslmode=disable" 1>/dev/null || exit 125
 docker exec  $1 vault write -address=$2 postgresql/config/lease lease=1h lease_max=24h 1>/dev/null || exit 125
