@@ -71,4 +71,3 @@
 
     - name: Vault init
       script: vault-init.sh {{vaultname}} {{vaultServer}}
-      run_once: true

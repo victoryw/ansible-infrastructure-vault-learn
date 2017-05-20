@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 ansible-playbook -v setup.yml \
 	-i production \
-	--connection=local
+	--connection=local \
+	--ask-sudo-pass
