@@ -1,6 +1,0 @@
----
-# roles role
-
-- hosts: roles
-  roles:
-    - { role: roles }

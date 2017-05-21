@@ -4,7 +4,7 @@
   hosts: all
   roles:
     - {role: provision, action_type: "install"}
-    
+
   tasks:
     - name: pip install psycopg2
       pip:
@@ -38,6 +38,16 @@
         login_host: "{{ansible_default_ipv4.address}}"
         login_password: "{{superUserPassword}}"
 
+    # - name: Copy vault init script
+    #   tempfile:
+    #     state: directory
+    #     suffix: vault
+    #   register: vaultScriptPath
+
+    - name: Copy vault init script
+      copy:
+        src: vault-init.sh
+        dest: "./vault-init.sh"
 
     - name: Vault init
-      script: vault-init.sh {{vaultname}} {{vaultServer}}
+      command: sh "./vault-init.sh" {{vaultname}} {{vaultServer}}
