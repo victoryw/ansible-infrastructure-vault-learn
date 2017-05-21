@@ -1,0 +1,15 @@
+- name: Ensure docker-compose directory exists
+  file:
+    path: "{{infrastructureDockerComposeFolder}}"
+    state: directory
+
+- name: Ensure docker-compose file is up to date
+  template:
+    src: infrastructure-docker-compose.j2
+    dest: "{{infrastructureDockerComposeFolder}}/docker-compose.yml"
+
+- name: Ensure vault config folder exists
+  file:
+    path: "{{vaultConfigVolume}}"
+    state: directory
+    recurse: yes

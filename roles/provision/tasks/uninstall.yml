@@ -1,0 +1,14 @@
+- name: "copy docker-compose.yml"
+  include: update-docker-compose-file.yml
+
+- name: docker-compose up to build infrastructure
+  docker_service:
+    project_name: infrastructure
+    project_src: "{{infrastructureDockerComposeFolder}}"
+    remove_volumes: yes
+    state: absent
+
+- name: Ensure vault volumes file removed
+  file:
+    path: "{{vaultVolume}}"
+    state: absent

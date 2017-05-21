@@ -1,0 +1,19 @@
+- name: "copy docker-compose.yml"
+  include: update-docker-compose-file.yml
+
+- name: Ensure vault.json file is up to date
+  template:
+    src: vault.json.j2
+    dest: "{{vaultConfigVolume}}/vault.json"
+
+- name: Docker-compose up to build infrastructure
+  docker_service:
+    project_name: infrastructure
+    project_src: "{{infrastructureDockerComposeFolder}}"
+
+- name: Wait for db restart
+  action: command docker exec {{dbname}} pg_isready
+  register: db_logs
+  until: db_logs.stdout.find("/var/run/postgresql:5432 - accepting connections") != -1
+  retries: 5
+  delay: 10
