@@ -1,35 +1,29 @@
 ---
-# rpm install
-docker_rpmpackage: no
+# Edition can be one of: 'ce' (Community Edition) or 'ee' (Enterprise Edition).
+docker_edition: 'ce'
+docker_package: "docker-{{ docker_edition }}"
+docker_package_state: present
 
-# daemon options
-docker_opts: --registry-mirror=http://fly2wind.m.alauda.cn
+# Service options.
+docker_service_state: started
+docker_service_enabled: yes
+docker_restart_handler_state: restarted
 
-#
-# certs
-#
-# A list of certs. e.g.
-# docker_certs:
-#   - "ca.crt"
-docker_certs: []
-#
-# registry
-#
-# A list of registries. e.g.
-# docker_registries:
-#   - host: docker.chatid.com
-#     auth: path/to/ca.crt
-docker_registries: []
+# Docker Compose options.
+docker_install_compose: True
+docker_compose_version: "1.21.2"
+docker_compose_path: /usr/local/bin/docker-compose
 
-#  additonal directory
-# docker_additonal_directory:
+# Used only for Debian/Ubuntu. Switch 'stable' to 'edge' if needed.
+docker_apt_release_channel: stable
+docker_apt_arch: amd64
+docker_apt_repository: "deb [arch={{ docker_apt_arch }}] https://download.docker.com/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} {{ docker_apt_release_channel }}"
+docker_apt_ignore_key_error: True
 
-# You can set any interface, that is listened by docker engine.
-docker_swarm_interface: "{{ ansible_default_ipv4['interface'] }}"
-docker_swarm_addr: "{{ hostvars[inventory_hostname]['ansible_' + docker_swarm_interface]['ipv4']['address'] }}"
-docker_swarm_port: 2377
+# Used only for RedHat/CentOS/Fedora.
+docker_yum_repo_url: https://download.docker.com/linux/{{ (ansible_distribution == "Fedora") | ternary("fedora","centos") }}/docker-{{ docker_edition }}.repo
+docker_yum_repo_enable_edge: 0
+docker_yum_repo_enable_test: 0
 
-# Switches disabling the docker-engine, docker group and swarm-mode setup.
-skip_engine: false 
-skip_swarm: false
-skip_docker_py: false
+# A list of users who will be added to the docker group.
+docker_users: [vagrant]

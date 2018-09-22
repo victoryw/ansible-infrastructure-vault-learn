@@ -3,31 +3,27 @@ dependencies: []
 
 galaxy_info:
   author: geerlingguy
-  description: Docker for Linux.
+  description: Pip (Python package manager) for Linux.
+  issue_tracker_url: https://github.com/geerlingguy/ansible-role-pip/issues
   company: "Midwestern Mac, LLC"
   license: "license (BSD, MIT)"
-  min_ansible_version: 2.4
+  min_ansible_version: 2.0
   platforms:
   - name: EL
     versions:
-    - 6
-    - 7
+    - all
   - name: Fedora
     versions:
     - all
   - name: Debian
     versions:
-    - jessie
+    - all
   - name: Ubuntu
     versions:
-    - trusty
-    - xenial
-    - bionic
+    - all
   galaxy_tags:
-    - web
     - system
-    - containers
-    - docker
-    - orchestration
-    - compose
     - server
+    - packaging
+    - python
+    - tools

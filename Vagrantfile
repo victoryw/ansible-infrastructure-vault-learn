@@ -22,9 +22,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.hostmanager.ignore_private_ip = false
   end
 
-  config.vm.box              = "debian/jessie64"
-  #config.vm.box              = "ubuntu/trusty64"
-  #config.vm.box              = "opensuse/openSUSE-42.1-x86_64"
+  config.vm.box              = "ubuntu/trusty64"
+  # ubuntu/xenial64
   config.vm.box_check_update = false
 
   # ssh
@@ -58,13 +57,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         ansible.limit          = "all"
         ansible.playbook       = "dev.yml"
         ansible.inventory_path = "dev"
-      end
-
-      cfg.vm.provision "ansible" do |ansible|
-        ansible.limit          = "all"
-        ansible.playbook       = "setup.yml"
-        ansible.inventory_path = "dev"
-        ansible.sudo = true
       end
 
     end

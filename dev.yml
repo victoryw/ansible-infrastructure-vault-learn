@@ -24,4 +24,5 @@
     # docker_additonal_directory: /data/lib/docker
   roles:
     - common
+    - geerlingguy.pip
     - docker
